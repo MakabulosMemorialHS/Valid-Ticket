@@ -1,0 +1,22 @@
+# Makefile used during the testing phase of the
+# various utility modules.
+#
+
+parser.o : Valids.hpp parser.cpp
+	g++ -Wall -c -DDEBUG_MODE parser.cpp
+
+Valids.o : Valids.hpp Valids.cpp
+	g++ -Wall -c -DDEBUG_MODE Valids.cpp
+
+Tickets.o : Tickets.hpp Valids.hpp Tickets.cpp
+	g++ -Wall -c -DDEBUG_MODE Tickets.cpp
+
+test1 : Valids.hpp parser.cpp
+	g++ -Wall -o test1 -DDEBUG_MODE parser.cpp
+
+test2 : Tickets.hpp Tickets.o parser.o test2.cpp
+	g++ -Wall -o test2 -DDEBUG_MODE test2.cpp Tickets.o parser.o
+
+test4 : test4.cpp Valids.hpp Tickets.hpp Tickets.o parser.o
+	g++ -Wall -o test4 -DDEBUG_MODE test4.cpp Tickets.o parser.o
+

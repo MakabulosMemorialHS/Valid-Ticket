@@ -1,0 +1,22 @@
+11 Dec 2011
+---------------------------------------------------------------------------
+-- So far, the following have been finished.
+    1. The parser for data.txt --- parser.cpp
+    2. The class declarations and definitions for the various
+       methods that work on the Tickets and TicketFields objects.
+
+-- Now working on completing the front end.
+
+-- The Valids program is shaping to be composed of the following
+   parts.
+
+    1. Class modules for the Ticket and TicketFields class.
+    2. Routines connected with the Valids ticket, which is
+       a kind of Ticket.
+    3. The various graphical frontends.
+
+
+30 Nov 2011
+---------------------------------------------------------------------------
+-- Started development by working on class that will parse data.txt
+
