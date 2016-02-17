@@ -7,17 +7,21 @@ of the MMHS. It is used by the Financial Office for creating Valid tickets
 en masse instead of printing each one manually.
 
 
-1. This program is developed on a Linux computer but can be cross-compiled
-   on a Windows machine. In fact, it is used on Windows Machines.
+1. This program was developed on a Linux computer and cross-compiled
+   on a Windows machine. In the MMHS it is mainly used on Windows.
 
 2. You will need the following to successfully compile this package.
+
    a) Qt 4
-   b) Gnu C++ Compiler. Use the MinGW compiler on Windows.
+
+   b) A version of the Gnu C++ Compiler. I suggest the MinGW compiler for Windows.
+
    c) Gnu Make.
 
 To build this package do the following:
 
    $ qmake Valids.pro
+   
    $ make
 
 
