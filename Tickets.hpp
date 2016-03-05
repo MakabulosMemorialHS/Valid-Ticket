@@ -38,11 +38,11 @@
 #define TICKETS_HPP
 
 namespace TICKETS {
-    const int MAXFIELDS     = 512;
-    const int MAXNAMELEN    = 512;
-    const int MAXFIELDLEN   = 512;
-    const int MAXTICKETS    = 1024;
-    const int MAXLINELENGTH = 1024;
+    const int MAXFIELDS     = 1024;
+    const int MAXNAMELEN    = 1024;
+    const int MAXFIELDLEN   = 1024;
+    const int MAXTICKETS    = 2048;
+    const int MAXLINELENGTH = 2048;
 }
 
 
@@ -51,52 +51,85 @@ namespace TICKETS {
 // would be SEX, STATUS, etc. We made the following decisions
 // about this class:
 //
-// (a) fieldName shall be case-insensitive
-// (b) All values will, in the meantime, be of type char *. Even so,
-//     we shall implement a getIntValue() and getFloatValue() method
-//     on the fieldValue member of this class.
+// This is a refactoring: In this version of the Ticket and TicketField
+// class:
+//
+// (a) fieldNames shall not be case-insensitive. There are some very subtle bugs
+//     introduced by having the fieldName be case sensitive. Those bugs are very hard
+//     to find.
+//
+// (b) Field values will be of type QString. The QString class is a thoroughly
+//     debugged string class. Let us take advantage of the work done by others.
+//
+// (c) We shall also implement methods called getIntValue() and
+//     getFloatValue() which will work as intended. For example, it shall
+//     return reasonable values if confronted with a field that cannot
+//     be converted to either a double or an int.
 //
 class TicketField {
     public:
 	// Default constructor. 
+
 	TicketField(void);
 
+
 	// Constructor that includes the fieldName and the
-	// fieldValue.
+	// fieldValue as char *. We also provide an overloaded constructor
+        // with QStrings as arguments.
+
         TicketField(char *, char *);
+        TicketField(QString *, QString *);
+
 
 	// Destructor.
+
 	~TicketField();
 
+
 	// The mutators.
-        void setFieldName(char *);
-	void setFieldValueString(char *);
+
+        void setFieldName(QString);
+	void setFieldValueString(QString);
 	void setFieldValueFloat(double);
 	void setFieldValueInt(int);
 
+
 	// The accessors.
-	//
-        char *getFieldName(char *);
-	char *getFieldValueString(char *);
+
+        QString getFieldName();
+	QString getFieldValueString();
 	double getFieldValueFloat();
 	int getFieldValueInt();
 
     private:
+        QString fieldName;
+        QString fieldValue;
+
+#ifdef OLD_VERSION
         char *fieldName;
         char *fieldValue;
+#endif
 };
 
+
 // A Ticket consists of a collection of TicketFields.
+
 class Ticket {
 
     public:
+
 	Ticket(void);
+	Ticket(char **headers, char *inbuf);
+
 
 	// Construct a new ticket from the given headers
 	// and the buffer containing a tab-delimited field
 	// of values.
-	Ticket(char **headers, char *inbuf);
 
+        // This constructor has the same function as the previous constructor
+        // but is provided QStringLists.
+        Ticket(QStringList *, QStringList *);
+ 
 	// Destructor.
 	//
 	~Ticket();
@@ -116,6 +149,7 @@ class Ticket {
 	// whose fieldName is given.
 	//
 	TicketField *get_named_field(const char *);
+        TicketField *get_named_field(QString);
 
 	// Indicates whether this Ticket has the value or
 	// content column_value for its column_name.
@@ -128,6 +162,7 @@ class Ticket {
         TicketField *fieldArray[TICKETS::MAXFIELDS];
 	int next_available;   // Index of next available slot in fieldArray.
 };
+
 
 // A collection of tickets from a single file we shall call a TicketDeck.
 // This is actually just a structure with fancy class-oriented
