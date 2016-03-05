@@ -29,6 +29,15 @@
 #include <string.h>
 #include "Tickets.hpp"
 
+
+
+// =====================================================================
+//
+//     Class Ticket
+//
+// =====================================================================
+
+
 // Create a ticket from the given headers and the
 // data from inbuf. inbuf is assumed to be a tab delimited
 // list of items.
@@ -126,35 +135,37 @@ TicketField *Ticket::get_indexed_field(int idx)
 }
 
 
-TicketField::TicketField(char *colname, char *colvalue)
+
+// ============================================================================
+//
+//     Class TicketField
+//
+// ============================================================================
+
+TicketField::TicketField(const char *colname, const char *colvalue)
 {
     int alen, blen;
 
-    if (colname != 0x00) {  // There is a valid column name given...
-	alen = strlen(colname);
-	fieldName = new char[alen+1];
-	strcpy(fieldName, colname);
-	if (colvalue != 0x00) { // If theres a valid column value...
-	    blen = strlen(colvalue);
-	    fieldValue = new char[blen+1];
-	    strcpy(fieldValue, colvalue);
-	}
-	else {
-	    *fieldValue = 0x00;
-	}
-    }
-    else {
-	*fieldName = 0x00;
-	*fieldValue = 0x00;
-    }
+    QString fname = colname;
+    QString fvalue = colvalue;
+
+    colvalue.remove(QChar('"'));    // Remove the double quotes.
+    colvalue.remove(QChar('\''));   // Remove the single quotes.
+
+
+    fieldname = fname.trimmed();
+    fieldvalue = fvalue.trimmed();
 }
 
-TicketField::~TicketField(void)
+
+TicketField::TicketField(QString field_name, QString field_value)
 {
-    if (*fieldName != 0x00) delete fieldName;
-    if (*fieldValue != 0x00) delete fieldValue;
-}
+    field_value.remove(QChar('"'));
+    field_value.remove(QChar('\''));
 
+    fieldName = field_name.trimmed();
+    fieldValue = field_value.trimmed();
+}
 
 
 // Get the field name and place a copy in targ
@@ -163,19 +174,30 @@ TicketField::~TicketField(void)
 //
 char *TicketField::getFieldName(char *targ)
 {
-    strcpy(targ, fieldName);
+    strcpy(targ, qPrintable(fieldName));
     return targ;
 }
 
+
+// The version using QStrings
+//
+QString TicketField::getFieldName(QString targ)
+{
+    return fieldName;
+}
 
 // Get the field value and place a copy in toag
 // Make sure targ points to a location with enough space
 // for the fieldname.
 char *TicketField::getFieldValueString(char *toag)
 {
-    strcpy(toag, fieldValue);
+    strcpy(toag, qPrintable(fieldValue));
     return toag;
 }
+
+
+// Return the fieldValue as a float.
+
 
 
 

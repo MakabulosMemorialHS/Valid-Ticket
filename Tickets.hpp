@@ -78,7 +78,7 @@ class TicketField {
         // with QStrings as arguments.
 
         TicketField(char *, char *);
-        TicketField(QString *, QString *);
+        TicketField(QString, QString);
 
 
 	// Destructor.
