@@ -29,84 +29,283 @@
 #include <string.h>
 #include "Tickets.hpp"
 
-
-
-// =====================================================================
+// ============================================================================
 //
-//     Class Ticket
+//     Class TicketField
 //
-// =====================================================================
+// ============================================================================
+
+TicketField::TicketField(const char *colname, const char *colvalue)
+{
+    QString fname = QString(colname);
+    QString fvalue;
+
+    if (colvalue == 0x00) { /* Null value */
+        fvalue = QString("");
+    }
+    else {
+       fvalue = QString(colvalue);
+    }
+
+    fname.remove(QChar('"'));    // Remove the double quotes.
+    fvalue.remove(QChar('"'));    // Remove the double quotes.
+    
+    fname.remove(QChar('\''));   // Remove the single quotes.
+    fvalue.remove(QChar('\''));   // Remove the single quotes.
+
+    TF_Field_Name = (fname.trimmed()).toUpper();
+    TF_Field_Value = fvalue.trimmed();
+}
 
 
-// Create a ticket from the given headers and the
-// data from inbuf. inbuf is assumed to be a tab delimited
-// list of items.
-// 
+TicketField::TicketField(QString field_name, QString field_value)
+{
+    QString ax = field_name.remove(QChar('"'));
+    ax = ax.remove(QChar('\'');
+
+    QString bx = field_value.remove(QChar('"'));
+    bx = bx.remove(QChar('"');
+
+    TF_Field_Name = (ax.trimmed()).toUpper();
+    TF_Field_Value = bx.trimmed();
+}
+
+
+char *TicketField::getFieldName(char *targ)
+// Get the field name and place a copy in targ
+// Make sure targ points to a location with enough space
+// for the fieldname.
+//
+// The field names when retrieved will always default to
+// upper case.
+{
+    strcpy(targ, qPrintable(TF_Field_Name.toUpper()));
+    return targ;
+}
+
+
+// The version using QStrings
+//
+QString TicketField::get_Field_Name_QString(void)
+{
+    return TF_Field_Name;   // assert: TF_Field_Name is in upper case.
+}
+
+
+// Get the field value and place a copy in toag
+// Make sure targ points to a location with enough space
+// for the fieldname.
+//
+// We have two versions. One version returns a char * the other
+// version returns a QString.
+char *TicketField::getFieldValueString(char *toag)
+{
+    strcpy(toag, qPrintable(TF_Field_Value));
+    return toag;
+}
+
+
+QString TicketField::get_Field_Value_QString(void)
+{
+    return TF_Field_Value;
+}
+
+
+// This function compares target with the TF_Field_Name
+// of the current TicketField.
+//
+// It returns 1 if target and TF_Field_Name are lexically the
+// same and 0 otherwise.
+//
+// When comparing the field names we do a non-case-sensitive
+// comparison.
+
+int TicketField::hasFieldName(QString target)
+{
+     QString ax = (target.trimmed()).toUpper;
+     QString bx = (TF_Field_Name.trimmed()).toUpper;
+ 
+     if (ax.compare(bx) == 0) {
+         return 1;
+     }
+     else return 0;
+}
+
+
+
+
+
+// =========================================================================
+//
+//                              Class Ticket
+//
+// A Ticket consists of a collection of TicketFields. The order of the
+// TicketFields in a Ticket should not be important. When retrieving
+// TicketFields, we always search on the Field Name and not the
+// particular location of the TicketField.
+//
+// =========================================================================
+
+
+
+// Construct a Ticket given the field names (which is in headers) and a tabbed
+// delimited file containing the field values. We assume that the locations
+// in inbuf are important as they shall be read sequentially and also
+// assigned sequentially the field names encoded in headers.
+//
 Ticket::Ticket(char **headers, char *inbuf)
 {
-    char *fieldnames[TICKETS::MAXFIELDS];
 
-    // First we properly initialize fieldnames and fieldArray.
-    //
-    next_available = 0;
+    /* Initialize the field array */
     for (int k = 0; k < TICKETS::MAXFIELDS; ++k) {
-	fieldnames[k] = 0x00;
-	fieldArray[k] = 0x00;
+        TK_Field_Array[k] = 0x00;
     }
 
-    get_field_values(inbuf, fieldnames);
+    QStringList qstrlistHeaders;
 
-    /* Assert: fieldnames is no longer empty. */
-
-
-    for (int k = 0; headers[k] != 0x00 && k < TICKETS::MAXFIELDS; ++k) {
-	if (fieldnames[k] == 0x00) break;
-        TicketField *temp = new TicketField(headers[k], fieldnames[k]);
-        this->addField(temp);
+    for (int k = 0; headers[k] != 0x00; ++k) {
+        content = tr(headers[k]);    // Get content of the header
+        content = content.remove(QChar('"'));     // Remove double quotes, if any.
+        content = content.remove(QChar('\''));    // Remove single quotes, if any.
+        
+        qstrlistHeaders.append(content.trimmed());   // Trim and append to qstrlistHeaders.
     }
-	        
-    // Destroy the memory pointed to by the elements of
-    // fieldnames. Prevents memory leakages.
-    //
-    for (int k = 0; fieldnames[k] != 0x00 && k < TICKETS::MAXFIELDS; ++k) {
-	delete fieldnames[k];
+
+    QString tkcontent = inbuf;    // assert: inbuf is now in content.
+    QStringList valuesList = tkcontent.split(QChar('\t'));
+
+    /* Now we create the TicketFields for this Ticket
+       We only create as many fields as there are Headers. 
+       If we ran out of data then we put in empty strings
+       in the Field Values. */
+
+    int max_headers = qstrHeaders.size();
+    int max_values  = valuesList.size();
+
+    for (int k = 0; k < max_headers && k < TICKETS::MAXFIELDS; ++k) {
+       if (k >= max_values) {
+           TK_Field_Array[k] = new TicketField(qstrHeaders.at(k), QString(""));
+       }
+       else {
+           TK_Field_Array[k] = new TicketField(qstrHeaders.at(k), valuesList.at(k));
+       }
     }
+    TK_Next_Available = max_headers;
 }
+
+
+// The following constructor has the same function as the previous constructor
+// but this time we already have a QStringList of ticketHeaders.
+// The routine is almost the same as previous.
+//
+Ticket::Ticket(QStringList ticketHeaders, char *tabbed_buffer)
+{
+    /* Initialize the field array */
+    for (int k = 0; k < TICKETS::MAXFIELDS; ++k) {
+        TK_Field_Array[k] = 0x00;
+    }
+
+    QString tkcontent = tabbed_buffer;    // assert: inbuf is now in content.
+    QStringList valuesList = tkcontent.split(QChar('\t'));
+
+    /* Now we create the TicketFields for this Ticket
+       We only create as many fields as there are Headers. 
+       If we ran out of data then we put in empty strings
+       in the Field Values. */
+
+    int max_headers = ticketHeaders.size();
+    int max_values  = valuesList.size();
+
+    for (int k = 0; k < max_headers && k < TICKETS::MAXFIELDS; ++k) {
+       if (k >= max_values) {
+           TK_Field_Array[k] = new TicketField(ticketHeaders.at(k), QString(""));
+       }
+       else {
+           TK_Field_Array[k] = new TicketField(ticketHeaders.at(k), valuesList.at(k));
+       }
+    }
+    TK_Next_Available = max_headers;
+}
+
+
+ 
 
 Ticket::~Ticket(void)
 {
-    for (int k = 0; k < next_available; ++k) {
-	delete fieldArray[k];
+    for (int k = 0; k < TK_Next_Available; ++k) {
+	delete TK_Field_Array[k];
     }
 }
+
 
 // Add the named TicketField to this Ticket.
 //
 void Ticket::addField(TicketField *f)
 {
-    this->fieldArray[next_available++] = f;
+    this->fieldArray[TK_Next_Available++] = f;
 }
-
 
 // Return with the number of fields in this ticket.
 int Ticket::getNumFields(void)
 {
-    return next_available;
+    return TK_Next_Available;
 }
 
+
+int Ticket::is_target_ticket(QString column_name, QString column_value)
+// Determine if the TicketField with column_name has the
+// same value with column_value.
+//
+// The return values are
+// 1   -- The column_value matches.
+// 0   -- The column_value does not match.
+// -1  -- There is no TicketField in this Ticket with the name column_name
+{
+    TicketField *currentField;
+
+    QString search_field_name = column_name.trimmed();
+    search_field_name = search_field_name.remove(QChar('"');
+    search_field_name = search_field_name.remove(QChar('\'');
+
+
+    QString search_field_value = column_value.trimmed();
+    search_field_value = search_field_value.remove(QChar('"');
+    search_field_value = search_field_value.remove(QChar('\'');
+
+    QString current_field_name, current_field_value;
+
+    int k;
+
+    for (k = 0; k < TK_Next_Available; ++k) {
+        currentField = TK_Field_Array[k];
+        field_name = currentField.getFieldName();
+        if (field_name.compare(column_name) == 0) {
+            field_value = currentField.getFieldValueString();
+            if (field_value.compare(column_value) == 0) {
+                return 1;
+            }
+            else {
+                return 0;
+            }
+        }
+    }
+
+    if (k == next_available) {
+        return -1;
+    }
+}
 
 int Ticket::is_target_ticket(char *column_name, char *column_value)
+// This version just calls the previous QString version but with
+// the proper parameters.
 {
-    char buffer[TICKETS::MAXFIELDLEN];
+    QString cname = column_name;
+    QString cvalue = column_value;
 
-    TicketField *tf = this->get_named_field(column_name);
-    if (tf == 0x00) return 0;
-    tf->getFieldValueString(buffer);
+    int rval = this->is_target_ticket(cname.trimmed(), cvalue.trimmed());
 
-    if (strcasecmp(buffer, column_value) == 0) return 1;
-    else return 0;
+    return rval;
 }
-
 
 // Return with a pointer to the TicketField whose
 // fieldName value is given by targ.
@@ -125,6 +324,13 @@ TicketField *Ticket::get_named_field(const char *targ)
     return (TicketField *) 0x00;
 }
 
+TicketField *Ticket::get_named_field(QString target)
+{
+    for (int i = 0; i < next_available; ++i) {
+        TicketField *p = this->fieldArray[
+    }
+}
+
 
 // Get the indexed TicketField for this Ticket.
 //
@@ -136,75 +342,13 @@ TicketField *Ticket::get_indexed_field(int idx)
 
 
 
-// ============================================================================
+
+
+// =========================================================================
 //
-//     Class TicketField
+//     Class TicketDeck.
 //
-// ============================================================================
-
-TicketField::TicketField(const char *colname, const char *colvalue)
-{
-    int alen, blen;
-
-    QString fname = colname;
-    QString fvalue = colvalue;
-
-    colvalue.remove(QChar('"'));    // Remove the double quotes.
-    colvalue.remove(QChar('\''));   // Remove the single quotes.
-
-
-    fieldname = fname.trimmed();
-    fieldvalue = fvalue.trimmed();
-}
-
-
-TicketField::TicketField(QString field_name, QString field_value)
-{
-    field_value.remove(QChar('"'));
-    field_value.remove(QChar('\''));
-
-    fieldName = field_name.trimmed();
-    fieldValue = field_value.trimmed();
-}
-
-
-// Get the field name and place a copy in targ
-// Make sure targ points to a location with enough space
-// for the fieldname.
-//
-char *TicketField::getFieldName(char *targ)
-{
-    strcpy(targ, qPrintable(fieldName));
-    return targ;
-}
-
-
-// The version using QStrings
-//
-QString TicketField::getFieldName(QString targ)
-{
-    return fieldName;
-}
-
-// Get the field value and place a copy in toag
-// Make sure targ points to a location with enough space
-// for the fieldname.
-char *TicketField::getFieldValueString(char *toag)
-{
-    strcpy(toag, qPrintable(fieldValue));
-    return toag;
-}
-
-
-// Return the fieldValue as a float.
-
-
-
-
-/* *******************************************************************
- * Methods for class TicketDeck.
- *
- * *******************************************************************/
+// =========================================================================
 
 // Constructor:
 //

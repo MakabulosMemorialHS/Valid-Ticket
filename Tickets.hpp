@@ -37,6 +37,9 @@
 #ifndef TICKETS_HPP
 #define TICKETS_HPP
 
+#include <QString>
+#include <QStringList>
+
 namespace TICKETS {
     const int MAXFIELDS     = 1024;
     const int MAXNAMELEN    = 1024;
@@ -88,27 +91,25 @@ class TicketField {
 
 	// The mutators.
 
-        void setFieldName(QString);
-	void setFieldValueString(QString);
-	void setFieldValueFloat(double);
-	void setFieldValueInt(int);
+        void setFieldName(QString);           // Unimplemented.
+	void setFieldValueString(QString);    // Ditto
+	void setFieldValueFloat(double);      // Maybe I don't need this yet? Unimplemented.
+	void setFieldValueInt(int);           // Unimplemented. Makes you wonder why I still have it here.
 
 
 	// The accessors.
 
-        QString getFieldName();
-	QString getFieldValueString();
+        char *getFieldName(char *);
+        QString get_Field_Name_QString(void);
+	char *getFieldValueString(char *);
 	double getFieldValueFloat();
 	int getFieldValueInt();
+        int hasFieldName(QString);       // Check if TicketField has this particular FieldName.
 
     private:
-        QString fieldName;
-        QString fieldValue;
+        QString TF_Field_Name;
+        QString TF_Field_Value;
 
-#ifdef OLD_VERSION
-        char *fieldName;
-        char *fieldValue;
-#endif
 };
 
 
@@ -119,19 +120,18 @@ class Ticket {
     public:
 
 	Ticket(void);
-	Ticket(char **headers, char *inbuf);
+
 
 
 	// Construct a new ticket from the given headers
 	// and the buffer containing a tab-delimited field
-	// of values.
+	// of values. Overloaded functions.
 
-        // This constructor has the same function as the previous constructor
-        // but is provided QStringLists.
-        Ticket(QStringList *, QStringList *);
- 
+	Ticket(char **headers, char *inbuf);
+        Ticket(QStringList headers, char *buff);
+
 	// Destructor.
-	//
+	
 	~Ticket();
 
 	void addField(TicketField *);
@@ -157,10 +157,11 @@ class Ticket {
 	// Returns 1 if true and 0 otherwise.
 	//
 	int is_target_ticket(char *column_name, char *column_value);
+        int is_target_ticket(QString column_name, QString column_value);
 
     private:
-        TicketField *fieldArray[TICKETS::MAXFIELDS];
-	int next_available;   // Index of next available slot in fieldArray.
+        TicketField *TK_Field_Array[TICKETS::MAXFIELDS];
+	int TK_Next_Available;   // Index of next available slot in fieldArray.
 };
 
 

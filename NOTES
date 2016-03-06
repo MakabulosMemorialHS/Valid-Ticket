@@ -1,3 +1,30 @@
+6 March 2016
+------------------------------------------------------------------
+-- Created the new branch refactor by splitting it off from master.
+
+-- renamed master branch to oldversion
+
+-- Changes have been pushed to the GitHub repository.
+
+
+5 March 2016
+------------------------------------------------------------------
+-- A subtle bug has been found. The data file test-data.txt will not
+   print any ticket if the search is made for the field CODE
+   with a field value of DUE.
+
+   An examination of the test-data.txt file reveals there is nothing
+   unusual about it.
+
+-- Testing the program using other field names seems to work. I
+   tested the program on test-data.txt by searching on the column
+   SECT for the string 7AG and it worked.
+
+   Why can't the program do the same search on the column CODE
+   for the string DUE?
+
+
+
 11 Dec 2011
 ---------------------------------------------------------------------------
 -- So far, the following have been finished.
