@@ -1,3 +1,13 @@
+26 May 2016
+------------------------------------------------------------------
+-- Returned to this project.
+
+-- Problem with program found previously. Unable to handle leading and
+   trailing spaces.
+
+-- Program will be ported to Apple OSX.
+
+
 6 March 2016
 ------------------------------------------------------------------
 -- Created the new branch refactor by splitting it off from master.

@@ -35,17 +35,20 @@
 //
 // ============================================================================
 
+
+/* ****************************************************************
+ * CONSTRUCTORS
+ * ****************************************************************/
+
 TicketField::TicketField(const char *colname, const char *colvalue)
 {
-    QString fname = QString(colname);
-    QString fvalue;
+    // Temporary placeholders for the field name and field value.
 
-    if (colvalue == 0x00) { /* Null value */
-        fvalue = QString("");
-    }
-    else {
-       fvalue = QString(colvalue);
-    }
+    QString fname = QString(colname);
+    QString fvalue = QString(colvalue);
+
+
+    // Now we remove double and single quotes.
 
     fname.remove(QChar('"'));    // Remove the double quotes.
     fvalue.remove(QChar('"'));    // Remove the double quotes.
@@ -71,7 +74,11 @@ TicketField::TicketField(QString field_name, QString field_value)
 }
 
 
-char *TicketField::getFieldName(char *targ)
+/* *************************************************************
+ * ACCESSORS
+ * *************************************************************/
+
+char *TicketField::get_Field_Name_pchar(char *targ)
 // Get the field name and place a copy in targ
 // Make sure targ points to a location with enough space
 // for the fieldname.
@@ -96,15 +103,17 @@ QString TicketField::get_Field_Name_QString(void)
 // Make sure targ points to a location with enough space
 // for the fieldname.
 //
-// We have two versions. One version returns a char * the other
-// version returns a QString.
-char *TicketField::getFieldValueString(char *toag)
+// This version returns a pointer to a char.
+//
+char *TicketField::get_Field_Value_pchar(char *toag)
 {
     strcpy(toag, qPrintable(TF_Field_Value));
     return toag;
 }
 
 
+// This version returns a QString.
+//
 QString TicketField::get_Field_Value_QString(void)
 {
     return TF_Field_Value;
@@ -120,10 +129,11 @@ QString TicketField::get_Field_Value_QString(void)
 // When comparing the field names we do a non-case-sensitive
 // comparison.
 
-int TicketField::hasFieldName(QString target)
+int TicketField::has_Field_Name(QString target)
 {
      QString ax = (target.trimmed()).toUpper;
-     QString bx = (TF_Field_Name.trimmed()).toUpper;
+
+     // QString bx = (TF_Field_Name.trimmed()).toUpper;
  
      if (ax.compare(bx) == 0) {
          return 1;
@@ -242,7 +252,7 @@ Ticket::~Ticket(void)
 //
 void Ticket::addField(TicketField *f)
 {
-    this->fieldArray[TK_Next_Available++] = f;
+    this->TK_Field_Array[TK_Next_Available++] = f;
 }
 
 // Return with the number of fields in this ticket.
@@ -277,11 +287,22 @@ int Ticket::is_target_ticket(QString column_name, QString column_value)
     int k;
 
     for (k = 0; k < TK_Next_Available; ++k) {
-        currentField = TK_Field_Array[k];
-        field_name = currentField.getFieldName();
-        if (field_name.compare(column_name) == 0) {
-            field_value = currentField.getFieldValueString();
-            if (field_value.compare(column_value) == 0) {
+
+        /* Get a TicketField from this Ticket */
+        currentField = TK_Field_Array[k];    
+
+        /* Get the Field Name of this TicketField */
+        current_field_name = currentField->get_Field_Name_QString();
+
+        /* Compare the Field Name of this TicketField with the Field Name
+           being searched. */
+        if (current_field_name.compare(search_field_name) == 0) {
+
+            /* Found a match. Now check if the Field Value is what
+               we are also looking for. */
+            current_field_value = currentField->get_Field_Value_QString();
+
+            if (current_field_value.compare(search_field_value) == 0) {
                 return 1;
             }
             else {
@@ -290,56 +311,37 @@ int Ticket::is_target_ticket(QString column_name, QString column_value)
         }
     }
 
-    if (k == next_available) {
+    if (k == TK_Next_Available) {
         return -1;
     }
 }
 
-int Ticket::is_target_ticket(char *column_name, char *column_value)
-// This version just calls the previous QString version but with
-// the proper parameters.
-{
-    QString cname = column_name;
-    QString cvalue = column_value;
-
-    int rval = this->is_target_ticket(cname.trimmed(), cvalue.trimmed());
-
-    return rval;
-}
 
 // Return with a pointer to the TicketField whose
-// fieldName value is given by targ.
+// fieldName value is given by targ or 0x00 if not found.
 //
-TicketField *Ticket::get_named_field(const char *targ)
+TicketField *Ticket::get_named_field(QString targ)
 {
-    TicketField *p;
-    char tp[TICKETS::MAXFIELDLEN];
+    QString targ2 = targ.remove(QChar('"'));
+    targ2 = (targ2.remove(QChar('\''))).trimmed();
 
-    for (int k = 0; k < TICKETS::MAXFIELDS 
-	              && this->fieldArray[k] != 0x00; ++k) {
-	p = this->fieldArray[k];
-        if (strcasecmp(p->getFieldName(tp), targ) == 0) 
-	    return p;
+    for (int k = 0; k < TK_Next_Available
+	              && this->TK_Field_Array[k] != 0x00; ++k) {
+	TicketField *p = TK_Field_Array[k];
+        QString ax = p->get_Field_Name_QString();
+
+        if (ax.compare(targ2) == 0) return p;
     }
     return (TicketField *) 0x00;
 }
-
-TicketField *Ticket::get_named_field(QString target)
-{
-    for (int i = 0; i < next_available; ++i) {
-        TicketField *p = this->fieldArray[
-    }
-}
-
 
 // Get the indexed TicketField for this Ticket.
 //
 TicketField *Ticket::get_indexed_field(int idx)
 {
-    if (idx < next_available && idx >= 0) return this->fieldArray[idx];
+    if (idx < TK_Next_Available && idx >= 0) return this->TK_Field_Array[idx];
     else return (TicketField *) 0x00;
 }
-
 
 
 
@@ -348,6 +350,15 @@ TicketField *Ticket::get_indexed_field(int idx)
 //
 //     Class TicketDeck.
 //
+// A collection of Tickets we call a TicketDeck. In production use, a TicketDeck
+// consists of the rows of tuples stored in a tab-delimited text file.
+//
+// The tab-delimited text file which we are working with have the following
+// properties.
+//
+// (a) The first row in the file are the headers.
+// (b) Each row thereafter represent individual tickets and each field
+//     
 // =========================================================================
 
 // Constructor:

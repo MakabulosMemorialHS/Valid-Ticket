@@ -51,17 +51,23 @@ namespace TICKETS {
 
 // The class TicketField encapsulates information about
 // a single field in the valids ticket. Examples of fields
-// would be SEX, STATUS, etc. We made the following decisions
+// would be SEX, STATUS, etc. A TicketField is just an ordered pair
+// where the first member is the Field Name and the second member
+// is the Field Value.
+//
+// We made the following decisions
 // about this class:
 //
 // This is a refactoring: In this version of the Ticket and TicketField
 // class:
 //
-// (a) fieldNames shall not be case-insensitive. There are some very subtle bugs
+// (a) Field Names shall not be case-insensitive. They will be stored as upper
+//     case values and a case insensitive search will always be carried out.
+//     There are some very subtle bugs
 //     introduced by having the fieldName be case sensitive. Those bugs are very hard
 //     to find.
 //
-// (b) Field values will be of type QString. The QString class is a thoroughly
+// (b) Field Names and Field values will be of type QString. The QString class is a thoroughly
 //     debugged string class. Let us take advantage of the work done by others.
 //
 // (c) We shall also implement methods called getIntValue() and
@@ -69,12 +75,17 @@ namespace TICKETS {
 //     return reasonable values if confronted with a field that cannot
 //     be converted to either a double or an int.
 //
+// (d) Field Values will be stored as is. No conversion to upper or lower case QStrings
+//     shall be made. When a search is carried out, the default search shall be
+//     case insensitive but a function shall also be provided to make the search
+//     case sensitive.
+//
+
 class TicketField {
     public:
 	// Default constructor. 
 
 	TicketField(void);
-
 
 	// Constructor that includes the fieldName and the
 	// fieldValue as char *. We also provide an overloaded constructor
@@ -97,14 +108,23 @@ class TicketField {
 	void setFieldValueInt(int);           // Unimplemented. Makes you wonder why I still have it here.
 
 
-	// The accessors.
+	// The accessors. The functions returning pointers to char
+        // are considered obsolete. Use the QString versions instead.
 
-        char *getFieldName(char *);
         QString get_Field_Name_QString(void);
-	char *getFieldValueString(char *);
-	double getFieldValueFloat();
-	int getFieldValueInt();
-        int hasFieldName(QString);       // Check if TicketField has this particular FieldName.
+        QString get_Field_Value_QString(void);
+
+        char *get_Field_Name_pchar(char *);
+	char *get_Field_Value_pchar(char *);
+
+        // ========================================================
+        // The following functions are presently unimplemented.
+        // ========================================================
+	double get_Field_Value_Float();
+	double get_Field_Value_Double();
+	int    get_Field_Value_Int();
+
+        int has_Field_Name(QString);       // Check if TicketField has this particular FieldName.
 
     private:
         QString TF_Field_Name;
@@ -113,7 +133,16 @@ class TicketField {
 };
 
 
-// A Ticket consists of a collection of TicketFields.
+// =========================================================================
+//
+//                              Class Ticket
+//
+// A Ticket consists of a collection of TicketFields. The order of the
+// TicketFields in a Ticket should not be important. When retrieving
+// TicketFields, we always search on the Field Name and not the
+// particular location of the TicketField.
+//
+// =========================================================================
 
 class Ticket {
 
