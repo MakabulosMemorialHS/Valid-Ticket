@@ -27,6 +27,8 @@
  ***********************************************************************/
 #include <stdio.h>
 #include <string.h>
+#include <assert.h>
+#include <QString>
 #include "Tickets.hpp"
 
 // ============================================================================
@@ -43,6 +45,10 @@
 TicketField::TicketField(const char *colname, const char *colvalue)
 {
     // Temporary placeholders for the field name and field value.
+
+    assert(colname != 0x00); /* This should not happen */
+
+    // Convert to QStrings.
 
     QString fname = QString(colname);
     QString fvalue = QString(colvalue);
@@ -63,11 +69,15 @@ TicketField::TicketField(const char *colname, const char *colvalue)
 
 TicketField::TicketField(QString field_name, QString field_value)
 {
+
     QString ax = field_name.remove(QChar('"'));
-    ax = ax.remove(QChar('\'');
+    ax = ax.remove(QChar('\''));
+    ax = field_name.trimmed();
+    assert(ax.size() != 0);  /* Shouldn't happen. */
+
 
     QString bx = field_value.remove(QChar('"'));
-    bx = bx.remove(QChar('"');
+    bx = bx.remove(QChar('"'));
 
     TF_Field_Name = (ax.trimmed()).toUpper();
     TF_Field_Value = bx.trimmed();
@@ -131,17 +141,13 @@ QString TicketField::get_Field_Value_QString(void)
 
 int TicketField::has_Field_Name(QString target)
 {
-     QString ax = (target.trimmed()).toUpper;
+     QString ax = (target.trimmed()).toUpper();
 
-     // QString bx = (TF_Field_Name.trimmed()).toUpper;
- 
-     if (ax.compare(bx) == 0) {
+     if (ax.compare(TF_Field_Name) == 0) {
          return 1;
      }
      else return 0;
 }
-
-
 
 
 
@@ -168,13 +174,14 @@ Ticket::Ticket(char **headers, char *inbuf)
 
     /* Initialize the field array */
     for (int k = 0; k < TICKETS::MAXFIELDS; ++k) {
-        TK_Field_Array[k] = 0x00;
+        TK_Field_Array[k] = (TicketField *) 0x00;
     }
 
     QStringList qstrlistHeaders;
+    QString instr = QString(inbuf);
 
     for (int k = 0; headers[k] != 0x00; ++k) {
-        content = tr(headers[k]);    // Get content of the header
+        QString content = QString(headers[k]);    // Get content of the header
         content = content.remove(QChar('"'));     // Remove double quotes, if any.
         content = content.remove(QChar('\''));    // Remove single quotes, if any.
         
@@ -189,15 +196,15 @@ Ticket::Ticket(char **headers, char *inbuf)
        If we ran out of data then we put in empty strings
        in the Field Values. */
 
-    int max_headers = qstrHeaders.size();
+    int max_headers = qstrlistHeaders.size();
     int max_values  = valuesList.size();
 
     for (int k = 0; k < max_headers && k < TICKETS::MAXFIELDS; ++k) {
        if (k >= max_values) {
-           TK_Field_Array[k] = new TicketField(qstrHeaders.at(k), QString(""));
+           TK_Field_Array[k] = new TicketField(qstrlistHeaders.at(k), QString(""));
        }
        else {
-           TK_Field_Array[k] = new TicketField(qstrHeaders.at(k), valuesList.at(k));
+           TK_Field_Array[k] = new TicketField(qstrlistHeaders.at(k), valuesList.at(k));
        }
     }
     TK_Next_Available = max_headers;
@@ -274,13 +281,13 @@ int Ticket::is_target_ticket(QString column_name, QString column_value)
     TicketField *currentField;
 
     QString search_field_name = column_name.trimmed();
-    search_field_name = search_field_name.remove(QChar('"');
-    search_field_name = search_field_name.remove(QChar('\'');
+    search_field_name = search_field_name.remove(QChar('"'));
+    search_field_name = search_field_name.remove(QChar('\''));
 
 
     QString search_field_value = column_value.trimmed();
-    search_field_value = search_field_value.remove(QChar('"');
-    search_field_value = search_field_value.remove(QChar('\'');
+    search_field_value = search_field_value.remove(QChar('"'));
+    search_field_value = search_field_value.remove(QChar('\''));
 
     QString current_field_name, current_field_value;
 
@@ -357,7 +364,7 @@ TicketField *Ticket::get_indexed_field(int idx)
 // properties.
 //
 // (a) The first row in the file are the headers.
-// (b) Each row thereafter represent individual tickets and each field
+// (b) Each row thereafter represent individual tickets
 //     
 // =========================================================================
 
@@ -373,7 +380,7 @@ TicketDeck::TicketDeck(char *pathname)
 
     // Initialize the headers and items arrays.
     //
-    for (int k = 0; k < 512; ++k) {
+    for (int k = 0; k < TICKETS::MAXFIELDS; ++k) {
 	TD_ticket_header[k] = 0x00;
 	items[k] = 0x00;
     }

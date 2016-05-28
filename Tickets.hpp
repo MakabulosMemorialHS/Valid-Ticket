@@ -91,7 +91,7 @@ class TicketField {
 	// fieldValue as char *. We also provide an overloaded constructor
         // with QStrings as arguments.
 
-        TicketField(char *, char *);
+        TicketField(const char *, const char *);
         TicketField(QString, QString);
 
 
