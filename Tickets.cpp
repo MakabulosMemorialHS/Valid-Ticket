@@ -41,6 +41,11 @@
 /* ****************************************************************
  * CONSTRUCTORS
  * ****************************************************************/
+TicketField::TicketField(QString field_name, QString field_value)
+{
+    this->init(field_name, field_value);
+}
+
 
 TicketField::TicketField(const char *colname, const char *colvalue)
 {
@@ -53,40 +58,49 @@ TicketField::TicketField(const char *colname, const char *colvalue)
     QString fname = QString(colname);
     QString fvalue = QString(colvalue);
 
-
-    // Now we remove double and single quotes.
-
-    fname.remove(QChar('"'));    // Remove the double quotes.
-    fvalue.remove(QChar('"'));    // Remove the double quotes.
-    
-    fname.remove(QChar('\''));   // Remove the single quotes.
-    fvalue.remove(QChar('\''));   // Remove the single quotes.
-
-    TF_Field_Name = (fname.trimmed()).toUpper();
-    TF_Field_Value = fvalue.trimmed();
+    this->init(fname, fvalue);
 }
 
+// The following function does the actual job of initializing the private
+// variables of this class.
 
-TicketField::TicketField(QString field_name, QString field_value)
+void TicketField::init(QString field_name, QString field_value)
 {
 
     QString ax = field_name.remove(QChar('"'));
     ax = ax.remove(QChar('\''));
-    ax = field_name.trimmed();
+    ax = ax.trimmed();
     assert(ax.size() != 0);  /* Shouldn't happen. */
 
 
     QString bx = field_value.remove(QChar('"'));
-    bx = bx.remove(QChar('"'));
+    bx = bx.remove(QChar('\''));
+    bx = bx.trimmed();
 
-    TF_Field_Name = (ax.trimmed()).toUpper();
-    TF_Field_Value = bx.trimmed();
+    TF_Field_Name  = ax;
+    TF_Field_Value = bx;
 }
+
 
 
 /* *************************************************************
  * ACCESSORS
  * *************************************************************/
+
+QString TicketField::get_Field_Name_QString(void)
+{
+    return TF_Field_Name;   // assert: TF_Field_Name is in upper case.
+}
+
+
+QString TicketField::get_Field_Value_QString(void)
+{
+    return TF_Field_Value;
+}
+
+
+// The following obsolete functions just call the function above.
+//
 
 char *TicketField::get_Field_Name_pchar(char *targ)
 // Get the field name and place a copy in targ
@@ -101,32 +115,10 @@ char *TicketField::get_Field_Name_pchar(char *targ)
 }
 
 
-// The version using QStrings
-//
-QString TicketField::get_Field_Name_QString(void)
-{
-    return TF_Field_Name;   // assert: TF_Field_Name is in upper case.
-}
-
-
-// Get the field value and place a copy in toag
-// Make sure targ points to a location with enough space
-// for the fieldname.
-//
-// This version returns a pointer to a char.
-//
 char *TicketField::get_Field_Value_pchar(char *toag)
 {
     strcpy(toag, qPrintable(TF_Field_Value));
     return toag;
-}
-
-
-// This version returns a QString.
-//
-QString TicketField::get_Field_Value_QString(void)
-{
-    return TF_Field_Value;
 }
 
 
@@ -149,6 +141,21 @@ int TicketField::has_Field_Name(QString target)
      else return 0;
 }
 
+// Like above but checks the field value. The test is
+// carried out case insensitive.
+//
+// Returns 1 if true and 0 otherwise.
+
+int TicketField::has_Field_Value(QString target)
+{
+     QString ax = (target.trimmed()).toUpper();
+     QString bx = TF_Field_Value.toUpper();
+     if (ax.compare(bx) == 0) {
+         return 1;
+     }
+     else return 0;
+}
+
 
 
 // =========================================================================
@@ -163,67 +170,15 @@ int TicketField::has_Field_Name(QString target)
 // =========================================================================
 
 
-
-// Construct a Ticket given the field names (which is in headers) and a tabbed
-// delimited file containing the field values. We assume that the locations
-// in inbuf are important as they shall be read sequentially and also
-// assigned sequentially the field names encoded in headers.
+// First the init() function---which we will be using with the constructors.
 //
-Ticket::Ticket(char **headers, char *inbuf)
-{
-
-    /* Initialize the field array */
-    for (int k = 0; k < TICKETS::MAXFIELDS; ++k) {
-        TK_Field_Array[k] = (TicketField *) 0x00;
-    }
-
-    QStringList qstrlistHeaders;
-    QString instr = QString(inbuf);
-
-    for (int k = 0; headers[k] != 0x00; ++k) {
-        QString content = QString(headers[k]);    // Get content of the header
-        content = content.remove(QChar('"'));     // Remove double quotes, if any.
-        content = content.remove(QChar('\''));    // Remove single quotes, if any.
-        
-        qstrlistHeaders.append(content.trimmed());   // Trim and append to qstrlistHeaders.
-    }
-
-    QString tkcontent = inbuf;    // assert: inbuf is now in content.
-    QStringList valuesList = tkcontent.split(QChar('\t'));
-
-    /* Now we create the TicketFields for this Ticket
-       We only create as many fields as there are Headers. 
-       If we ran out of data then we put in empty strings
-       in the Field Values. */
-
-    int max_headers = qstrlistHeaders.size();
-    int max_values  = valuesList.size();
-
-    for (int k = 0; k < max_headers && k < TICKETS::MAXFIELDS; ++k) {
-       if (k >= max_values) {
-           TK_Field_Array[k] = new TicketField(qstrlistHeaders.at(k), QString(""));
-       }
-       else {
-           TK_Field_Array[k] = new TicketField(qstrlistHeaders.at(k), valuesList.at(k));
-       }
-    }
-    TK_Next_Available = max_headers;
-}
-
-
-// The following constructor has the same function as the previous constructor
-// but this time we already have a QStringList of ticketHeaders.
-// The routine is almost the same as previous.
-//
-Ticket::Ticket(QStringList ticketHeaders, char *tabbed_buffer)
+void Ticket::init(QStringList ticketHeaders, QStringList valuesList)
 {
     /* Initialize the field array */
+    TK_Next_Available = 0;
     for (int k = 0; k < TICKETS::MAXFIELDS; ++k) {
         TK_Field_Array[k] = 0x00;
     }
-
-    QString tkcontent = tabbed_buffer;    // assert: inbuf is now in content.
-    QStringList valuesList = tkcontent.split(QChar('\t'));
 
     /* Now we create the TicketFields for this Ticket
        We only create as many fields as there are Headers. 
@@ -244,8 +199,34 @@ Ticket::Ticket(QStringList ticketHeaders, char *tabbed_buffer)
     TK_Next_Available = max_headers;
 }
 
+// Construct a Ticket given a QStringList of field names
+// and a QStringList of field values.
+//
+Ticket::Ticket(QStringList ticketHeaders, QStringList valuesList)
+{
+    this->init(ticketHeaders, valuesList);
+}
 
- 
+
+// Create a Ticket from a tab delimited char* of field names
+// and field values. This function just calls the function above
+// after converting the char pointers to QStringLists.
+
+
+Ticket::Ticket(char *headers, char *inbuf)
+{
+
+    QString hqstr  = QString(headers);
+    QString fvqstr = QString(inbuf);
+
+    QStringList field_names  =  hqstr.split(QChar('\t'));
+    QStringList field_values = fvqstr.split(QChar('\t'));
+
+    this->init(field_names, field_values);
+}
+
+
+// Destructor
 
 Ticket::~Ticket(void)
 {
@@ -270,7 +251,8 @@ int Ticket::getNumFields(void)
 
 
 int Ticket::is_target_ticket(QString column_name, QString column_value)
-// Determine if the TicketField with column_name has the
+// Search through all the TicketFields in this ticket and determine
+// if the TicketField with column_name has the
 // same value with column_value.
 //
 // The return values are
@@ -278,8 +260,6 @@ int Ticket::is_target_ticket(QString column_name, QString column_value)
 // 0   -- The column_value does not match.
 // -1  -- There is no TicketField in this Ticket with the name column_name
 {
-    TicketField *currentField;
-
     QString search_field_name = column_name.trimmed();
     search_field_name = search_field_name.remove(QChar('"'));
     search_field_name = search_field_name.remove(QChar('\''));
@@ -289,38 +269,26 @@ int Ticket::is_target_ticket(QString column_name, QString column_value)
     search_field_value = search_field_value.remove(QChar('"'));
     search_field_value = search_field_value.remove(QChar('\''));
 
-    QString current_field_name, current_field_value;
+    for (int k = 0; k < TK_Next_Available; ++k) {
 
-    int k;
+        TicketField *currentField = TK_Field_Array[k];    
 
-    for (k = 0; k < TK_Next_Available; ++k) {
-
-        /* Get a TicketField from this Ticket */
-        currentField = TK_Field_Array[k];    
-
-        /* Get the Field Name of this TicketField */
-        current_field_name = currentField->get_Field_Name_QString();
-
-        /* Compare the Field Name of this TicketField with the Field Name
-           being searched. */
-        if (current_field_name.compare(search_field_name) == 0) {
-
-            /* Found a match. Now check if the Field Value is what
-               we are also looking for. */
-            current_field_value = currentField->get_Field_Value_QString();
-
-            if (current_field_value.compare(search_field_value) == 0) {
+        if (currentField->has_Field_Name(search_field_name)) {
+            if (currentField->has_Field_Value(search_field_value)) {
                 return 1;
             }
-            else {
+            else 
                 return 0;
-            }
         }
     }
 
-    if (k == TK_Next_Available) {
-        return -1;
-    }
+    return -1;
+}
+
+// Version using char pointers.
+int Ticket::is_target_ticket(char *column_name, char *column_value)
+{
+    return this->is_target_ticket(QString(column_name), QString(column_value));
 }
 
 
@@ -335,10 +303,11 @@ TicketField *Ticket::get_named_field(QString targ)
     for (int k = 0; k < TK_Next_Available
 	              && this->TK_Field_Array[k] != 0x00; ++k) {
 	TicketField *p = TK_Field_Array[k];
-        QString ax = p->get_Field_Name_QString();
-
-        if (ax.compare(targ2) == 0) return p;
+        if (p->has_Field_Name(targ)) {
+            return p;
+        }
     }
+
     return (TicketField *) 0x00;
 }
 
@@ -374,21 +343,15 @@ TicketField *Ticket::get_indexed_field(int idx)
 TicketDeck::TicketDeck(char *pathname)
 {
     char inbuffer[TICKETS::MAXLINELENGTH];
-    char *items[512];
 
     FILE *dataf = fopen(pathname, "r");
 
-    // Initialize the headers and items arrays.
-    //
-    for (int k = 0; k < TICKETS::MAXFIELDS; ++k) {
-	TD_ticket_header[k] = 0x00;
-	items[k] = 0x00;
-    }
 
 
     // First we get the headers.
     fgets(inbuffer, TICKETS::MAXLINELENGTH, dataf);
-    get_fieldnames(inbuffer,TD_ticket_header);
+    QString strbuff = QString(inbuffer);
+    TD_ticket_header = strbuff.split(QChar('\t'));
 
 
     // Then we get the collection of tickets.
@@ -396,9 +359,12 @@ TicketDeck::TicketDeck(char *pathname)
     //
     int tcount = 0;
     while (fgets(inbuffer, TICKETS::MAXLINELENGTH, dataf) != NULL) {
-        Ticket *temp = new Ticket(TD_ticket_header, inbuffer);
+        strbuff = QString(inbuffer);
+        QStringList field_values = strbuff.split(QChar('\t'));
+        Ticket *temp = new Ticket(TD_ticket_header, field_values);
 	TD_ticket_array[tcount++] = temp;
     }
+
     TD_ticket_array[tcount] = 0x00;   // Terminate with a sentinel value.
     TD_num_tickets = tcount;
 

@@ -83,53 +83,63 @@ namespace TICKETS {
 
 class TicketField {
     public:
-	// Default constructor. 
+
+        // ======================================================
+        // CONSTRUCTORS.
+        // ======================================================
 
 	TicketField(void);
-
-	// Constructor that includes the fieldName and the
-	// fieldValue as char *. We also provide an overloaded constructor
-        // with QStrings as arguments.
-
         TicketField(const char *, const char *);
         TicketField(QString, QString);
 
 
-	// Destructor.
-
+        // ======================================================
+	// DESTRUCTOR.
+        // ======================================================
+ 
 	~TicketField();
 
 
-	// The mutators.
-
-        void setFieldName(QString);           // Unimplemented.
-	void setFieldValueString(QString);    // Ditto
-	void setFieldValueFloat(double);      // Maybe I don't need this yet? Unimplemented.
-	void setFieldValueInt(int);           // Unimplemented. Makes you wonder why I still have it here.
-
-
-	// The accessors. The functions returning pointers to char
-        // are considered obsolete. Use the QString versions instead.
+        // ======================================================
+	// MUTATORS and ACCESSORS
+        // ======================================================
 
         QString get_Field_Name_QString(void);
         QString get_Field_Value_QString(void);
 
-        char *get_Field_Name_pchar(char *);
-	char *get_Field_Value_pchar(char *);
+        int has_Field_Name(QString);       // Check if TicketField has this particular FieldName.
+        int has_Field_Value(QString);
+
+
+        // ====================================================
+        // OBSOLETE Functions.
+        // Do not use with new programs.
+        // ===================================================
+
+        char *get_Field_Name_pchar(char *); // Obsolete
+	char *get_Field_Value_pchar(char *); // Obsolete
+
 
         // ========================================================
+        // UNIMPLEMENTED Functions.
         // The following functions are presently unimplemented.
+        // Unless these functions are needed somehow they would
+        // probably remain unimplemented.
         // ========================================================
 	double get_Field_Value_Float();
 	double get_Field_Value_Double();
 	int    get_Field_Value_Int();
+        void setFieldName(QString); 
+	void setFieldValueString(QString); 
+	void setFieldValueFloat(double);
+	void setFieldValueInt(int);
 
-        int has_Field_Name(QString);       // Check if TicketField has this particular FieldName.
+
 
     private:
         QString TF_Field_Name;
         QString TF_Field_Value;
-
+        void init(QString, QString);   // Only used privately
 };
 
 
@@ -156,8 +166,10 @@ class Ticket {
 	// and the buffer containing a tab-delimited field
 	// of values. Overloaded functions.
 
-	Ticket(char **headers, char *inbuf);
-        Ticket(QStringList headers, char *buff);
+        Ticket(QStringList headers, QStringList buff);
+	Ticket(char *headers, char *inbuf);   // Obsolete. Do not use
+                                               // with new programs.
+
 
 	// Destructor.
 	
@@ -191,6 +203,7 @@ class Ticket {
     private:
         TicketField *TK_Field_Array[TICKETS::MAXFIELDS];
 	int TK_Next_Available;   // Index of next available slot in fieldArray.
+        void init(QStringList, QStringList);
 };
 
 
@@ -230,7 +243,7 @@ class TicketDeck
 
     private:
 	Ticket *TD_ticket_array[TICKETS::MAXTICKETS];
-	char *TD_ticket_header[TICKETS::MAXFIELDS];
+	QStringList TD_ticket_header;
 	int TD_num_tickets;
 };
 
