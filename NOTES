@@ -1,3 +1,12 @@
+30 May 2016
+------------------------------------------------------------------
+-- Refactoring completed in Tickets.hpp and Tickets.cpp.
+
+-- Current branch which contains the changes is refactor.
+
+-- Next up: Test branch refactor and if satisfactory merge rafactor branch
+   with master branch.
+
 26 May 2016
 ------------------------------------------------------------------
 -- Returned to this project.
