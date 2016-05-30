@@ -121,6 +121,14 @@ char *TicketField::get_Field_Value_pchar(char *toag)
     return toag;
 }
 
+char *TicketField::getFieldValueString(char *toag)
+{
+    strcpy(toag, qPrintable(TF_Field_Value));
+    return toag;
+}
+
+
+
 
 // This function compares target with the TF_Field_Name
 // of the current TicketField.
@@ -311,6 +319,14 @@ TicketField *Ticket::get_named_field(QString targ)
     return (TicketField *) 0x00;
 }
 
+// The following obsolete function just calls the above function.
+
+TicketField *Ticket::get_named_field(const char *targ)
+{
+    return this->get_named_field(QString(targ));
+}
+
+
 // Get the indexed TicketField for this Ticket.
 //
 TicketField *Ticket::get_indexed_field(int idx)
@@ -343,13 +359,16 @@ TicketField *Ticket::get_indexed_field(int idx)
 TicketDeck::TicketDeck(char *pathname)
 {
     char inbuffer[TICKETS::MAXLINELENGTH];
+    char *retvp;    /* used to squash warnings about unused return values. */
 
     FILE *dataf = fopen(pathname, "r");
 
 
 
     // First we get the headers.
-    fgets(inbuffer, TICKETS::MAXLINELENGTH, dataf);
+    retvp = fgets(inbuffer, TICKETS::MAXLINELENGTH, dataf);
+    assert(retvp != 0x00);
+
     QString strbuff = QString(inbuffer);
     TD_ticket_header = strbuff.split(QChar('\t'));
 

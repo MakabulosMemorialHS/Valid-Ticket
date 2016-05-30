@@ -97,7 +97,7 @@ class TicketField {
 	// DESTRUCTOR.
         // ======================================================
  
-	~TicketField();
+	// ~TicketField();
 
 
         // ======================================================
@@ -118,6 +118,7 @@ class TicketField {
 
         char *get_Field_Name_pchar(char *); // Obsolete
 	char *get_Field_Value_pchar(char *); // Obsolete
+        char *getFieldValueString(char *);   // Use get_Field_Value_QString();
 
 
         // ========================================================
