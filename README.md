@@ -40,13 +40,16 @@ Before using git, set the following necessary global variables.
    $ git config --global user.email "rtonypascual@gmail.com"
    $ git config --global core.editor vim
 
+
 Check what branch you are in with
 
    $ git branch
 
+
 To switch to branch master
 
    $ git checkout master
+
 
 To determine where the remote repository exists
 
@@ -58,9 +61,9 @@ with the remote branch. For example, to synchronize the branch refactor ...
 
    $ git pull https://github.com/MakabulosMemorialHS/Valid-Ticket.git refactor
    
+
 To push your changes to the remote repository on branch master:
 
    $ git push https://github.com/MakabulosMemorialHS/Valid-Ticket.git master
    
-
 
