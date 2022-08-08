@@ -48,8 +48,12 @@ This repository has two branches:
 
    Remember to checkout or pull the correct branch before compiling.
 
+To clone the "online" branch give the command
 
-To check what branch you are in with
+   $ git clone -b online https://github.com/MakabulosMemorialHS/Valid-Ticket.git
+
+
+To check what branch you are in 
 
    $ git branch
 
