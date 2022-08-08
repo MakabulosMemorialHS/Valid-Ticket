@@ -30,4 +30,32 @@ before anything else:
    $ export QT_SELECT=qt4
    
 
+GitHub
+------------------------------------------------------------
+This package is version managed by github.com.
+
+Before using git, set the following necessary global variables.
+
+   $ git config --global user.name "Robert Pascual"
+   $ git config --global user.email "rtonypascual@gmail.com"
+   $ git config --global core.editor vim
+
+Check what branch you are in with
+
+   $ git branch
+
+To switch to branch master
+
+   $ git checkout master
+
+To determine where the remote repository exists
+
+   $ git remote show origin
+
+
+Then, before working on this package, synchronize the branch you will be working on
+with the remote branch. For example, to synchronize the branch refactor ...
+
+   $ git pull https://github.com/MakabulosMemorialHS/Valid-Ticket.git refactor
+
 
