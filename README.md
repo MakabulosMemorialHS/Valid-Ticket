@@ -57,5 +57,10 @@ Then, before working on this package, synchronize the branch you will be working
 with the remote branch. For example, to synchronize the branch refactor ...
 
    $ git pull https://github.com/MakabulosMemorialHS/Valid-Ticket.git refactor
+   
+To push your changes to the remote repository on branch master:
+
+   $ git push https://github.com/MakabulosMemorialHS/Valid-Ticket.git master
+   
 
 
