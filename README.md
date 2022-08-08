@@ -66,4 +66,11 @@ To push your changes to the remote repository on branch master:
 
    $ git push https://github.com/MakabulosMemorialHS/Valid-Ticket.git master
    
+Github now requires a personal access token in order to push changes to
+the repository. When prompted, give the following
+
+   user: MakabulosMemorialHS
+   pass: Check the access token at access-token.txt. If this file
+         does not exist then ask GitHub to create a new access token
+         for you. You need to login to GitHub first.
 
