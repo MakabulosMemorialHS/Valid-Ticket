@@ -380,11 +380,11 @@ void agent_set_params_dialog::accept(void)
             if ((field_1 = ticketp->get_named_field("MS MAK")) != 0x00)
 	        field_1->getFieldValueString(buffer_A);
             else strcpy(buffer_A, "");
-            if ((field_2 = ticketp->get_named_field("USB")) != 0x00)
+            if ((field_2 = ticketp->get_named_field("AF")) != 0x00)
 	        field_2->getFieldValueString(buffer_B);
             else strcpy(buffer_B, "");
 
-	    sprintf(buffer_D, "MS %13s USB %12s", buffer_A, buffer_B);
+	    sprintf(buffer_D, "MS %13s AF %13s", buffer_A, buffer_B);
             painter.drawText(VALIDS::PAPER_ABSCISSA_ORIGIN
 		                 + page_hpos * VALIDS::HORIZ_SKIP,
 		             VALIDS::PAPER_ORDINATE_ORIGIN
@@ -394,14 +394,14 @@ void agent_set_params_dialog::accept(void)
 
 	    // TP and TAPSA
 	    //
-            if ((field_1 = ticketp->get_named_field("ONLINE")) != 0x00)
+            if ((field_1 = ticketp->get_named_field("T-PAPER")) != 0x00)
 	        field_1->getFieldValueString(buffer_A);
             else strcpy(buffer_A, "");
-            if ((field_2 = ticketp->get_named_field("BS")) != 0x00)
+            if ((field_2 = ticketp->get_named_field("TAPSA")) != 0x00)
 	        field_2->getFieldValueString(buffer_B);
             else strcpy(buffer_B, "");
 
-	    sprintf(buffer_D, "Online %9s BS    %10s", buffer_A, buffer_B);
+	    sprintf(buffer_D, "TP %13s Tapsa %10s", buffer_A, buffer_B);
             painter.drawText(VALIDS::PAPER_ABSCISSA_ORIGIN
 		                 + page_hpos * VALIDS::HORIZ_SKIP,
 		             VALIDS::PAPER_ORDINATE_ORIGIN
@@ -414,11 +414,11 @@ void agent_set_params_dialog::accept(void)
             if ((field_1 = ticketp->get_named_field("INS.")) != 0x00)
 	        field_1->getFieldValueString(buffer_A);
             else strcpy(buffer_A, "");
-            if ((field_2 = ticketp->get_named_field("MISC")) != 0x00)
+            if ((field_2 = ticketp->get_named_field("L. FEE")) != 0x00)
 	        field_2->getFieldValueString(buffer_B);
             else strcpy(buffer_B, "");
 
-	    sprintf(buffer_D, "INS %12s MISC %11s", buffer_A, buffer_B);
+	    sprintf(buffer_D, "INS %12s LFEE %11s", buffer_A, buffer_B);
             painter.drawText(VALIDS::PAPER_ABSCISSA_ORIGIN
 		                 + page_hpos * VALIDS::HORIZ_SKIP,
 		             VALIDS::PAPER_ORDINATE_ORIGIN
