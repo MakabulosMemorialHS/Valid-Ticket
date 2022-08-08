@@ -41,7 +41,15 @@ Before using git, set the following necessary global variables.
    $ git config --global core.editor vim
 
 
-Check what branch you are in with
+This repository has two branches:
+
+   1. master -- the master version.
+   2. online -- the branch used during the pandemic.
+
+   Remember to checkout or pull the correct branch before compiling.
+
+
+To check what branch you are in with
 
    $ git branch
 
@@ -70,6 +78,7 @@ Github now requires a personal access token in order to push changes to
 the repository. When prompted, give the following
 
    user: MakabulosMemorialHS
+
    pass: Check the access token at access-token.txt. If this file
          does not exist then ask GitHub to create a new access token
          for you. You need to login to GitHub first.
