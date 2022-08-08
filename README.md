@@ -12,9 +12,9 @@ en masse instead of printing each one manually.
 
 2. You will need the following to successfully compile this package.
 
-   a) Qt 4
+   a) Qt 4.7.4 (minimum)
 
-   b) A version of the Gnu C++ Compiler. I suggest the MinGW compiler for Windows.
+   b) A version of the Gnu C++ Compiler. I suggest the MinGW-4.4.0 compiler for Windows.
 
    c) Gnu Make.
 
@@ -23,5 +23,11 @@ To build this package do the following:
    $ qmake Valids.pro
    
    $ make
+   
+If building under Linux with multiple versions of Qt, then give the following command
+before anything else:
+
+   $ export QT_SELECT=qt4
+   
 
 
